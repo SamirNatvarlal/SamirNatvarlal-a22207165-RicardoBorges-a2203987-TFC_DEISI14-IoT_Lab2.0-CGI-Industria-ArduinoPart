@@ -11,7 +11,7 @@ const char* ssid = "Nsei"; // Substitua pelo SSID da sua rede WiFi
 const char* password = "Tiger2015"; // Substitua pela senha da sua rede WiFi
 
 // Configurações do Broker MQTT
-const char* mqtt_server = "10.10.0.57"; // Substitua pelo IP do seu broker MQTT
+const char* mqtt_server = "5.196.78.28"; // Substitua pelo IP do seu broker MQTT
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -34,7 +34,7 @@ const int vibrationSensorPin = 3;
 Adafruit_INA219 ina219;
 
 // Configuração do sensor DHT11
-#define DHTPIN 4
+#define DHTPIN A1
 #define DHTTYPE DHT11
 DHT dht(DHTPIN, DHTTYPE);
 
@@ -87,9 +87,9 @@ void callback(char* topic, byte* message, unsigned int length) {
   }
   Serial.println();
 
-  if (messageTemp == "1") {
-    modoOK();
-  } else if (messageTemp == "2") {
+  if (messageTemp.indexOf("funcao 1") >= 0) {
+   modoOK();
+  } else if (messageTemp.indexOf("funcao 2") >= 0) {
     modoNOTOK();
   }
 
@@ -102,11 +102,12 @@ void modoOK() {
   modeOKCount++;
   unsigned long start = millis();
   delay(2000);
-  digitalWrite(4, LOW);
-  digitalWrite(5, HIGH);
+  digitalWrite(4, LOW);//vermelho
+  digitalWrite(5, HIGH);//verde
   delay(2000);  // Mantém os LEDs acesos por 2 segundos
-  digitalWrite(7, HIGH);
-  digitalWrite(6, LOW);
+  digitalWrite(6, LOW);//vermelho
+  digitalWrite(7, HIGH);//verde
+  
 
   // Movimentar o motor de passo para frente e para trás
   Serial.println("Movimentação do motor do modoOK");
@@ -116,18 +117,17 @@ void modoOK() {
   myStepper.setSpeed(15);
 
   // Mover o motor -135 graus (768 passos)
-  myStepper.step(-4000);  // Gira o motor -135 graus
   Serial.println("Motor move para frente");
+  myStepper.step(-4000);  // Gira o motor -135 graus
 
   delay(5000);
 
    // Mover o motor -135 graus (768 passos)
+  Serial.println("Motor move volta para trás");
   myStepper.step(4000);  // Gira o motor -135 graus
 
   motorActivationTime += millis() - start;
   motorActivations++;
-
-  Serial.println("Motor move volta para trás");
 
   delay(500);
   // Verifica se o microswitch foi pressionado
@@ -245,10 +245,10 @@ void setup() {
     while (true); // Não continua se o shield não for encontrado
   }
 
-  pinMode(4, OUTPUT);
-  pinMode(5, OUTPUT);
-  pinMode(6, OUTPUT);
-  pinMode(7, OUTPUT);
+  pinMode(4, OUTPUT);//1-vermelho
+  pinMode(5, OUTPUT);//1-verde
+  pinMode(6, OUTPUT);//2-vermelho
+  pinMode(7, OUTPUT);//2-verde
   pinMode(switchPin, INPUT_PULLUP); // Configura o pino do microswitch
   pinMode(vibrationSensorPin, INPUT);
   dht.begin();
@@ -269,7 +269,7 @@ void loop() {
   }
   client.loop();
   //checkVibration();
-  //readPowerSensor();
-  //readDHT11();
+  readPowerSensor();
+  readDHT11();
   delay(2000);
 }
